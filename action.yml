@@ -1,23 +1,25 @@
 name: "Run static analysis for C++ project"
-description: "Runs cppcheck and clang-tidy on CMake based project. The result will be added as PR comment"
+description: "Runs cppcheck and clang-tidy on CMake based project. The result will be added either as PR comment, or as GitHub's output console"
 
 inputs:
   github_token:
     description: 'Github token used for Github API requests'
-    required: true
     default: ${{ github.token }}
   pr_num:
     description: 'Pull request number for which the comment will be created'
     default: ${{ github.event.pull_request.number }}
-    required: true
   repo:
     description: 'Repository name'
     default: ${{ github.repository }}
-    required: true
+  pr_repo:
+    description: 'Head repository (This is useful when using Action with [pull_request_target])'
+    default: ${{ github.event.pull_request.head.repo.full_name }}
+  pr_head:
+    description: 'Head (branch) for PR (same as `pr_repo` input, useful with [pull_request_target]'
+    default: ${{ github.event.pull_request.head.ref }}
   comment_title:
     description: 'Title for comment with the raport. This should be an unique name'
     default: Static analysis result
-    required: true
   exclude_dir:
     description: 'Directory which should be excluded from the raport'
   apt_pckgs:
@@ -28,13 +30,21 @@ inputs:
       'This should be used, when the project requires some environmental set-up beforehand'
       'Note. `apt_pckgs` will run before this script, just in case you need some packages installed'
   cppcheck_args:
-    description: 'CPPCHECK (space separated) arguments that will be used'
+    description: 'cppcheck (space separated) arguments that will be used'
     default: --enable=all --suppress=missingInclude --inline-suppr --inconclusive
+  clang_tidy_args:
+    description: 'clang-tidy arguments that will be used (example: -checks="*,fuchsia-*,google-*,zircon-*"'
   report_pr_changes_only:
     description: 'Only post the issues found within the changes introduced in this Pull Request'
     default: false
   cmake_args:
     description: 'Additional CMake arguments'
+  force_console_print:
+    description: 'Output the action result to console, instead of creating the comment'
+    default: false
+  verbose:
+    description: 'Verbose output. Used for debugging'
+    default: false
 
 runs:
   using: "docker"
