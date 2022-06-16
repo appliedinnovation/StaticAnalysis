@@ -108,6 +108,8 @@ def create_comment_for_output(tool_output, prefix, files_changed_in_pr, category
             file_path_end_idx = line.index(':')
             file_path = line[:file_path_end_idx]
             line = line[file_path_end_idx+1:]
+            if ':' not in line:
+                continue
             file_line_start = int(line[:line.index(':')])
             file_line_end = get_file_line_end(file_path, file_line_start)
             description = f"\n```diff\n!Line: {file_line_start} - {line[line.index(' ')+1:]}``` \n"
